@@ -2,6 +2,7 @@ const merge = require("webpack-merge");
 const path = require("path");
 const base = require("./base");
 const TerserPlugin = require("terser-webpack-plugin");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = merge.merge(base, {
   mode: "production",
@@ -24,5 +25,10 @@ module.exports = merge.merge(base, {
         }
       })
     ]
-  }
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./src/index.html"
+    })
+  ]
 });
