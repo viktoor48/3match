@@ -3,6 +3,7 @@ import { App } from "../system/App";
 import { Scene } from "../system/Scene";
 import { Board } from "./Board";
 import { CombinationManager } from "./CombinationManager";
+import { ScoreTimerManager } from "./ScoreTimerManager";
 
 export class Game extends Scene {
     constructor() {
@@ -13,13 +14,50 @@ export class Game extends Scene {
         this.board = new Board();
         this.container.addChild(this.board.container);
 
+        this.scoreTimerManager = new ScoreTimerManager(
+            this.endGame.bind(this),
+            this.updateHUD.bind(this),
+            60,
+            120
+        );
+
+        this.createHUD();
+
         this.board.container.on('tile-touch-start', this.onTileClick.bind(this));
 
         this.combinationManager = new CombinationManager(this.board);
         this.removeStartMatches();
+
+        this.scoreTimerManager.startTimer();
+    }
+
+    createHUD() {
+        this.scoreText = new PIXI.Text('Счет: 0', {fontSize: 24, fill: '#ffffff'});
+        this.scoreText.x = 20;
+        this.scoreText.y = 20;
+        this.container.addChild(this.scoreText);
+
+        this.timeText = new PIXI.Text('Время: 60', {fontSize: 24, fill: '#ffffff'});
+        this.timeText.y = 20;
+        this.timeText.x = this.scoreText.width + 80;
+        this.container.addChild(this.timeText);
+    }
+
+    updateHUD(score, time) {
+        this.scoreText.text = `Счет: ${score}`;
+        this.timeText.text = `Время: ${time}`;
+    }
+
+    endGame(won) {
+        if (won) {
+            alert(`Вы победили! Ваш счет: ${this.scoreTimerManager.score}`);
+        } else {
+            alert(`Время вышло! Ваш счет: ${this.scoreTimerManager.score}`)
+        }
     }
 
     onTileClick(tile) {
+        console.log(this.disabled)
         if (this.disabled) {
             return;
         }
@@ -106,6 +144,7 @@ export class Game extends Scene {
     }
 
     processMatches(matches) {
+        this.scoreTimerManager.addPoints(matches.length * 10);
         this.removeMatches(matches);
         this.processFallDown()
             .then(() => this.addTiles())
