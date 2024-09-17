@@ -8,8 +8,8 @@ export const Config = {
         "Game": Game
     },
     board: {
-        rows: 8,
-        cols: 8,
+        rows: 7,
+        cols: 7,
     },
     tilesColors: ['black', 'color', 'gold', 'green', 'white', 'yellow'],
     combinationRules: [
