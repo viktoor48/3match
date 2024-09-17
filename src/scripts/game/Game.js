@@ -41,6 +41,11 @@ export class Game extends Scene {
         this.timeText.y = 20;
         this.timeText.x = this.scoreText.width + 80;
         this.container.addChild(this.timeText);
+
+        this.contentText = new PIXI.Text(`Набери ${this.scoreTimerManager.targetScore} очков`, {fontSize: 24, fill: '#ffffff'});
+        this.contentText.y = 20;
+        this.contentText.x = (window.innerWidth / 2) - this.contentText.width / 2;
+        this.container.addChild(this.contentText);
     }
 
     updateHUD(score, time) {
