@@ -13,6 +13,12 @@ export class Board {
         this.ajustPosition();
     }
 
+    resetBoard() {
+        this.fields.forEach((field) => {
+            field.tile.remove();
+        })
+    }
+
     getField(row, col) {
         return this.fields.find((field) => field.row === row && field.col === col);
     }

@@ -25,6 +25,12 @@ export class ScoreTimerManager {
         this.onTimeEnd(won);
     }
 
+    reset(initialTime) {
+        this.score = 0;
+        this.timeLimit = initialTime;
+        this.onScoreUpdate(this.score, this.timeLimit);
+    }
+
     stopTimer() {
         clearInterval(this.timer);
     }
@@ -32,7 +38,7 @@ export class ScoreTimerManager {
     addPoints(points) {
         this.score += points;
         this.onScoreUpdate(this.score, this.timeLimit);
-
+        
         if (this.score >= this.targetScore) {
             this.endGame(true)
         }

@@ -1,11 +1,5 @@
 import { App } from "../system/App";
-import * as PIXI from "pixi.js";
 import { gsap } from "gsap";
-import { PixiPlugin } from 'gsap/PixiPlugin';
-
-gsap.registerPlugin(PixiPlugin);
-
-PixiPlugin.registerPIXI(PIXI);
 
 export class Tile {
     constructor(color) {

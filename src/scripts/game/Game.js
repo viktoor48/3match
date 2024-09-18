@@ -8,7 +8,16 @@ import { ScoreTimerManager } from "./ScoreTimerManager";
 export class Game extends Scene {
     constructor() {
         super();
+        this.gameStatus = {
+            gameOver: false,
+            victory: false,
+        }
+        this.initGame();
+    }
+
+    initGame() {
         this.container = new PIXI.Container();
+        
         this.createBackground();
 
         this.board = new Board();
@@ -18,7 +27,7 @@ export class Game extends Scene {
             this.endGame.bind(this),
             this.updateHUD.bind(this),
             60,
-            120
+            100
         );
 
         this.createHUD();
@@ -29,6 +38,20 @@ export class Game extends Scene {
         this.removeStartMatches();
 
         this.scoreTimerManager.startTimer();
+    }
+
+    resetGame() {
+        this.gameStatus = {
+            gameOver: false,
+            victory: false,
+        }
+        this.disabled = true;
+        this.board.resetBoard();
+        this.board.createTiles();
+        this.removeStartMatches();
+        this.scoreTimerManager.reset(60);
+        this.scoreTimerManager.startTimer();
+        this.disabled = false;
     }
 
     createHUD() {
@@ -51,14 +74,6 @@ export class Game extends Scene {
     updateHUD(score, time) {
         this.scoreText.text = `Счет: ${score}`;
         this.timeText.text = `Время: ${time}`;
-    }
-
-    endGame(won) {
-        if (won) {
-            alert(`Вы победили! Ваш счет: ${this.scoreTimerManager.score}`);
-        } else {
-            alert(`Время вышло! Ваш счет: ${this.scoreTimerManager.score}`)
-        }
     }
 
     onTileClick(tile) {
@@ -95,15 +110,19 @@ export class Game extends Scene {
                 const matches = this.combinationManager.getMatches();
 
                 if (matches.length) {
-                    this.processMatches(matches);
+                    this.processMatches(matches).then(() => {
+                        if (this.gameStatus.gameOver) {
+                            this.showResultMessage();
+                            this.resetGame();
+                            console.log('игра завершена');
+                        }
+                    });
                 } else {
                     this.swap(tile, selectedTile, true);
                 }
             } else {
                 this.disabled = false;
             }
-
-            
         })
     }
 
@@ -149,21 +168,45 @@ export class Game extends Scene {
     }
 
     processMatches(matches) {
-        this.scoreTimerManager.addPoints(matches.length * 10);
-        this.removeMatches(matches);
-        this.processFallDown()
-            .then(() => this.addTiles())
-            .then(() => this.onFallDownOver())
+        return new Promise((resolve) => {
+            this.scoreTimerManager.addPoints(matches.length * 10);
+            this.removeMatches(matches);
+            this.processFallDown()
+                .then(() => this.addTiles())
+                .then(() => this.onFallDownOver())
+                .then(() => resolve());
+        })
+    }
+
+    endGame(won = false) {
+        this.gameStatus.gameOver = true;
+        if (won) {
+            this.gameStatus.victory = won;
+
+        } else {
+            this.gameStatus.gameOver = won;
+        }
+    }
+
+    showResultMessage() {
+        if (this.gameStatus.victory) {
+            alert(`Вы победили! Ваш счет: ${this.scoreTimerManager.score}`);
+        } else {
+            alert(`Время вышло! Ваш счет: ${this.scoreTimerManager.score}`)
+        }
     }
 
     onFallDownOver() {
-        const matches = this.combinationManager.getMatches();
+        return new Promise((resolve) => {
+            const matches = this.combinationManager.getMatches();
 
-        if (matches.length) {
-            this.processMatches(matches);
-        } else {
-            this.disabled = false;
-        }
+            if (matches.length) {
+                this.processMatches(matches).then(() => resolve());
+            } else {
+                this.disabled = false;
+                resolve();
+            }
+        })
     }
 
     removeStartMatches() {

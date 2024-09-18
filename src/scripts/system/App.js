@@ -1,9 +1,14 @@
 import * as PIXI from 'pixi.js';
 import { SceneManager } from './SceneManager';
 import { Loader } from './Loader';
+import { gsap } from "gsap";
+import { PixiPlugin } from 'gsap/PixiPlugin';
 
 class Application {
     run(config) {
+        gsap.registerPlugin(PixiPlugin);
+        PixiPlugin.registerPIXI(PIXI);
+
         this.config = config;
 
         this.app = new PIXI.Application({resizeTo: window});
